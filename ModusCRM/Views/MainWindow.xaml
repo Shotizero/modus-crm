@@ -1,0 +1,59 @@
+﻿<Window x:Class="ModusCRM.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ModusCRM"
+        xmlns:vm="clr-namespace:ModusCRM.ViewModels"
+        mc:Ignorable="d"
+        Title="ModusCRM" 
+        Height="500" 
+        Width="1000">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!--Панель инструментов-->
+        <ToolBar Grid.Row="0">
+            <TextBlock Text="Выберите таблицу для просмотра:" 
+                       Style="{StaticResource LabelStyle}"/>
+            
+            <ComboBox Style="{StaticResource ComboBoxStyle}" 
+                      ItemsSource="{Binding TableNames}" 
+                      SelectedItem="{Binding SelectedTable}" 
+                      Width="150"/>
+
+            <Separator/>
+
+            <Button Content="&#x2795;" ToolTip="Добавить" Command="{Binding AddCommand}" Style="{StaticResource ButtonStyle}"/>
+            <Button Content="&#x2716;" ToolTip="Удалить" Command="{Binding DeleteCommand}" Style="{StaticResource ButtonStyle}"/>
+            <Button Content="&#x270E;" ToolTip="Изменить" Command="{Binding EditCommand}" Style="{StaticResource ButtonStyle}"/>
+        </ToolBar>
+
+        <!--Таблица-->
+        <DataGrid Grid.Row="1" 
+                  x:Name="MainGrid"
+                  ItemsSource="{Binding CurrentItems}"
+                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                  AutoGenerateColumns="True"
+                  AutoGeneratingColumn="MainGrid_AutoGeneratingColumn"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow"
+                  RowEditEnding="MainGrid_RowEditEnding"
+                  Margin="5"
+                  ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}"
+                  RowStyle="{StaticResource DataGridRowStyle}"
+                  CellStyle="{StaticResource DataGridCellStyle}"/>
+        
+    </Grid>
+</Window>
