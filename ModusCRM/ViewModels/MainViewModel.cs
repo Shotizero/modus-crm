@@ -1,4 +1,6 @@
-﻿using ModusCRM.Common;
+﻿using Microsoft.EntityFrameworkCore;
+using ModusCRM.Common;
+using ModusCRM.Data;
 using ModusCRM.Models;
 using System.Collections;
 using System.Collections.ObjectModel;
@@ -11,6 +13,8 @@ namespace ModusCRM.ViewModels;
 public class MainViewModel : ObservableObject
 {
     private object _editingItem;
+
+    private AppDbContext _context;
 
     private IList CurrentList => CurrentItems as IList;
 
@@ -78,13 +82,16 @@ public class MainViewModel : ObservableObject
         DeleteCommand = new RelayCommand(_ => DeleteItem());
         CommitCommand = new RelayCommand(_ => CommitItem());
         CancelCommand = new RelayCommand(_ => CancelCommitItem());
-    }
 
-    public void SaveChanges(object item)
-    {
-        if (item == null)
+        try
         {
-            return;
+            _context = new AppDbContext();
+            LoadFromDatabase();
+        }
+        catch(Exception ex)
+        {
+            MessageBox.Show(ex.Message, "PostgreSQL Error");
+            Environment.Exit(ex.HResult);
         }
     }
 
@@ -123,11 +130,12 @@ public class MainViewModel : ObservableObject
         }
 
         CurrentList.Remove(SelectedItem);
+        SaveChanges(SelectedItem, EntityState.Deleted);
     }
 
     private void CommitItem()
     {
-        if (EditingItem == null)
+        if (EditingItem == null || EditingItem is not IEntity e)
         {
             return;
         }
@@ -143,18 +151,22 @@ public class MainViewModel : ObservableObject
             // Добавляем в коллекцию, если это новый объект
             if (!CurrentItems.Cast<object>().Contains(EditingItem))
             {
-                AddToCurrentCollection(EditingItem);
+                (CurrentItems as IList)?.Add(EditingItem);
             }
 
-            // Пишем в БД (INSERT или UPDATE)
-            SaveChanges(EditingItem);
+            // Пишем в БД
+            var itemState = e.Id == 0 
+                ? EntityState.Added 
+                : EntityState.Modified;
 
-            // закроет форму, очистит Fields
+            SaveChanges(EditingItem, itemState);
+
+            // Закрываем форму, очищаем Fields
             EditingItem = null;
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ошибка: {ex.Message}");
+            MessageBox.Show($"Ошибка: {ex.ToString()}", "Error");
         }
     }
 
@@ -184,8 +196,36 @@ public class MainViewModel : ObservableObject
         }
     }
 
-    private void AddToCurrentCollection(object item)
+    public void LoadFromDatabase()
     {
-        (CurrentItems as IList)?.Add(item);
+        Employees.Clear();
+
+        foreach (var e in _context.Employees.OrderBy(e => e.Id).ToList())
+        {
+            Employees.Add(e);
+        }
+    }
+
+    private void SaveChanges(object item, EntityState state)
+    {
+        if (item == null || item is not Employee e)
+        {
+            return;
+        }
+
+        switch (state)
+        {
+            case EntityState.Added:
+                _context.Employees.Add(e);
+                break;
+            case EntityState.Modified:
+                break;
+            case EntityState.Deleted:
+                _context.Employees.Remove(e);
+                break;
+            default: break;
+        }
+
+        _context.SaveChanges();
     }
 }

@@ -60,6 +60,7 @@
                   RowStyle="{StaticResource DataGridRowStyle}"
                   CellStyle="{StaticResource DataGridCellStyle}"/>
 
+        <!--Редактор полей-->
         <Grid Grid.Row="2" Margin="5" Visibility="{Binding EditingItem, Converter={StaticResource NullToVis}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>

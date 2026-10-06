@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace ModusCRM.Models;
 
-public class Employee : ObservableObject
+public class Employee : ObservableObject, IEntity
 {
     public int Id { get; set; }
 
