@@ -14,6 +14,8 @@ public class MainViewModel : ObservableObject
 
     public ObservableCollection<Customer> Customers { get; } = new();
 
+    public ObservableCollection<Address> Addresses { get; } = new();
+
     public ICommand AddCommand { get; }
 
     public ICommand DeleteCommand { get; }
@@ -29,8 +31,23 @@ public class MainViewModel : ObservableObject
     public List<string> TableNames { get; } = new()
     {
         "Сотрудники",
-        "Клиенты"
-    };
+        "Клиенты",
+        "Адреса"
+    };    
+
+    public IEnumerable CurrentItems
+    {
+        get
+        {
+            return SelectedTable switch
+            {
+                "Сотрудники" => Employees,
+                "Клиенты" => Customers,
+                "Адреса" => Addresses,
+                _ => null
+            };
+        }
+    }
 
     public string SelectedTable
     {
@@ -42,19 +59,6 @@ public class MainViewModel : ObservableObject
             OnPropertyChanged(nameof(CurrentItems));
         }
     }
-
-    public IEnumerable CurrentItems
-    {
-        get
-        {
-            return SelectedTable switch
-            {
-                "Сотрудники" => Employees,
-                "Клиенты" => Customers,
-                _ => null
-            };
-        }
-    }    
 
     public MainViewModel()
     {
@@ -74,8 +78,30 @@ public class MainViewModel : ObservableObject
 
         object newItem = SelectedTable switch
         {
-            "Сотрудники" => new Employee { FullName = "Новый сотрудник" },
-            "Клиенты" => new Customer { FullName = "Новый клиент" },
+            "Сотрудники" => new Employee
+            {
+                FirstName = "Новый",
+                LastName = "Сотрудник", 
+                Position = "Не указана", 
+                Login = "Не указан", 
+                Password = "Не указан", 
+                PhoneNumber = "Не указан"
+            },
+            "Клиенты" => new Customer
+            {
+                FirstName = "Новый",
+                LastName = "Клиент", 
+                PhoneNumber = "Не указан", 
+                PersonalAccount = "Не указан"
+            },
+            "Адреса" => new Address 
+            { 
+                Country = "Не указана", 
+                Region = "Не указан", 
+                Settlement = "Не указан", 
+                Street = "Не указана", 
+                House = "Не указан" 
+            },
             _ => null
         };
 

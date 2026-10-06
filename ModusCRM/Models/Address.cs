@@ -3,12 +3,12 @@ using System.ComponentModel;
 
 namespace ModusCRM.Models;
 
-public class Employee : ObservableObject
+public class Address : ObservableObject
 {
     public int Id { get; set; }
 
-    [DisplayName("Имя")]
-    public string FirstName
+    [DisplayName("Страна")]
+    public string Country
     {
         get => field;
         set
@@ -18,8 +18,8 @@ public class Employee : ObservableObject
         }
     }
 
-    [DisplayName("Фамилия")]
-    public string LastName
+    [DisplayName("Регион")]
+    public string Region
     {
         get => field;
         set
@@ -29,8 +29,8 @@ public class Employee : ObservableObject
         }
     }
 
-    [DisplayName("Должность")]
-    public string Position 
+    [DisplayName("Населенный пункт")]
+    public string Settlement
     {
         get => field;
         set
@@ -40,8 +40,8 @@ public class Employee : ObservableObject
         }
     }
 
-    [DisplayName("Номер телефона")]
-    public string PhoneNumber
+    [DisplayName("Улица")]
+    public string Street
     {
         get => field;
         set
@@ -51,8 +51,8 @@ public class Employee : ObservableObject
         }
     }
 
-    [DisplayName("Адрес")]
-    public Address Address
+    [DisplayName("Номер дома")]
+    public string House
     {
         get => field;
         set
@@ -61,26 +61,4 @@ public class Employee : ObservableObject
             OnPropertyChanged();
         }
     }
-
-    [DisplayName("Логин")]
-    public string Login 
-    {
-        get => field;
-        set
-        {
-            field = value;
-            OnPropertyChanged();
-        }
-    }
-
-    [DisplayName("Пароль")]
-    public string Password 
-    {
-        get => field;
-        set
-        {
-            field = value;
-            OnPropertyChanged();
-        }
-    }    
 }

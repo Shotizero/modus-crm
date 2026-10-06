@@ -7,8 +7,19 @@ public class Customer : ObservableObject
 {
     public int Id { get; set; }
 
-    [DisplayName("Имя клиента")]
-    public string FullName
+    [DisplayName("Имя")]
+    public string FirstName
+    {
+        get => field;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    [DisplayName("Фамилия")]
+    public string LastName
     {
         get => field;
         set
@@ -30,7 +41,7 @@ public class Customer : ObservableObject
     }
 
     [DisplayName("Адрес")]
-    public string Address
+    public Address Address
     {
         get => field;
         set
