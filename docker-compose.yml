@@ -1,0 +1,21 @@
+services:
+  modus:
+    image: postgres:16-alpine
+    container_name: modus
+    restart: unless-stopped
+    ports:
+      - "2222:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: saGiaxMor21aa
+      POSTGRES_DB: service_center
+    volumes:
+      - modus_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d service_center"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  modus_data:
