@@ -2,19 +2,21 @@
 using ModusCRM.Models;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.Reflection;
+using System.Windows;
 using System.Windows.Input;
 
 namespace ModusCRM.ViewModels;
 
 public class MainViewModel : ObservableObject
 {
+    private object _editingItem;
+
     private IList CurrentList => CurrentItems as IList;
 
+    public ObservableCollection<FieldRow> Fields { get; } = new();
+
     public ObservableCollection<Employee> Employees { get; } = new();
-
-    public ObservableCollection<Customer> Customers { get; } = new();
-
-    public ObservableCollection<Address> Addresses { get; } = new();
 
     public ICommand AddCommand { get; }
 
@@ -22,17 +24,15 @@ public class MainViewModel : ObservableObject
 
     public ICommand EditCommand { get; }
 
-    public ICommand SaveCommand { get; }
+    public ICommand CommitCommand { get; }
+
+    public ICommand CancelCommand { get; }
 
     public object SelectedItem { get; set; }
 
-    public event Action EditRequested;
-
     public List<string> TableNames { get; } = new()
     {
-        "Сотрудники",
-        "Клиенты",
-        "Адреса"
+        "Сотрудники"
     };    
 
     public IEnumerable CurrentItems
@@ -42,8 +42,6 @@ public class MainViewModel : ObservableObject
             return SelectedTable switch
             {
                 "Сотрудники" => Employees,
-                "Клиенты" => Customers,
-                "Адреса" => Addresses,
                 _ => null
             };
         }
@@ -60,6 +58,17 @@ public class MainViewModel : ObservableObject
         }
     }
 
+    public object EditingItem
+    {
+        get => _editingItem;
+        set
+        {
+            _editingItem = value;
+            OnPropertyChanged();
+            BuildFields();
+        }
+    }
+
     public MainViewModel()
     {
         SelectedTable = TableNames.FirstOrDefault();
@@ -67,6 +76,16 @@ public class MainViewModel : ObservableObject
         AddCommand = new RelayCommand(_ => AddItem());
         EditCommand = new RelayCommand(_ => EditItem());
         DeleteCommand = new RelayCommand(_ => DeleteItem());
+        CommitCommand = new RelayCommand(_ => CommitItem());
+        CancelCommand = new RelayCommand(_ => CancelCommitItem());
+    }
+
+    public void SaveChanges(object item)
+    {
+        if (item == null)
+        {
+            return;
+        }
     }
 
     private void AddItem()
@@ -78,42 +97,22 @@ public class MainViewModel : ObservableObject
 
         object newItem = SelectedTable switch
         {
-            "Сотрудники" => new Employee
-            {
-                FirstName = "Новый",
-                LastName = "Сотрудник", 
-                Position = "Не указана", 
-                Login = "Не указан", 
-                Password = "Не указан", 
-                PhoneNumber = "Не указан"
-            },
-            "Клиенты" => new Customer
-            {
-                FirstName = "Новый",
-                LastName = "Клиент", 
-                PhoneNumber = "Не указан", 
-                PersonalAccount = "Не указан"
-            },
-            "Адреса" => new Address 
-            { 
-                Country = "Не указана", 
-                Region = "Не указан", 
-                Settlement = "Не указан", 
-                Street = "Не указана", 
-                House = "Не указан" 
-            },
+            "Сотрудники" => new Employee(),
             _ => null
         };
 
-        if (newItem != null)
-        {
-            CurrentList.Add(newItem);
-        }
+        EditingItem = newItem;
     }
 
     private void EditItem()
     {
-        EditRequested?.Invoke();
+        if (SelectedItem == null)
+        {
+            MessageBox.Show("Выберите строку");
+            return;
+        }
+
+        EditingItem = SelectedItem;
     }
 
     private void DeleteItem()
@@ -126,11 +125,67 @@ public class MainViewModel : ObservableObject
         CurrentList.Remove(SelectedItem);
     }
 
-    public void SaveChanges(object item)
+    private void CommitItem()
     {
-        if (item == null)
+        if (EditingItem == null)
         {
             return;
         }
+
+        try
+        {
+            // Переносим значения из Fields в объект
+            foreach (var f in Fields)
+            {
+                f.Commit();
+            }
+
+            // Добавляем в коллекцию, если это новый объект
+            if (!CurrentItems.Cast<object>().Contains(EditingItem))
+            {
+                AddToCurrentCollection(EditingItem);
+            }
+
+            // Пишем в БД (INSERT или UPDATE)
+            SaveChanges(EditingItem);
+
+            // закроет форму, очистит Fields
+            EditingItem = null;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка: {ex.Message}");
+        }
+    }
+
+    private void CancelCommitItem()
+    {
+        EditingItem = null;
+    }
+
+    private void BuildFields()
+    {
+        Fields.Clear();
+
+        if (_editingItem == null)
+        {
+            return;
+        }
+
+        var props = _editingItem
+            .GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.CanRead && p.CanWrite)
+            .Where(p => p.Name != "Id");     // Id не редактируем
+
+        foreach (var p in props)
+        {
+            Fields.Add(new FieldRow(_editingItem, p));
+        }
+    }
+
+    private void AddToCurrentCollection(object item)
+    {
+        (CurrentItems as IList)?.Add(item);
     }
 }

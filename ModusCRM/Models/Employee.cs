@@ -51,17 +51,6 @@ public class Employee : ObservableObject
         }
     }
 
-    [DisplayName("Адрес")]
-    public Address Address
-    {
-        get => field;
-        set
-        {
-            field = value;
-            OnPropertyChanged();
-        }
-    }
-
     [DisplayName("Логин")]
     public string Login 
     {

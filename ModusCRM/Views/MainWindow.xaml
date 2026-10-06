@@ -5,19 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ModusCRM"
         xmlns:vm="clr-namespace:ModusCRM.ViewModels"
+        xmlns:common="clr-namespace:ModusCRM.Common"
         mc:Ignorable="d"
         Title="ModusCRM" 
-        Height="500" 
+        Height="600" 
         Width="1000">
 
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
 
+    <Window.Resources>
+        <common:NullToVisibilityConverter x:Key="NullToVis"/>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <!--Панель инструментов-->
@@ -49,11 +55,55 @@
                   IsReadOnly="True"
                   SelectionMode="Single"
                   SelectionUnit="FullRow"
-                  RowEditEnding="MainGrid_RowEditEnding"
                   Margin="5"
                   ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}"
                   RowStyle="{StaticResource DataGridRowStyle}"
                   CellStyle="{StaticResource DataGridCellStyle}"/>
-        
+
+        <Grid Grid.Row="2" Margin="5" Visibility="{Binding EditingItem, Converter={StaticResource NullToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+
+            <DataGrid Grid.Row="0" 
+                      x:Name="FieldsGrid"
+                      ItemsSource="{Binding Fields}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}"
+                      RowStyle="{StaticResource DataGridRowStyle}"
+                      CellStyle="{StaticResource DataGridCellStyle}">
+                
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Поле"
+                                        Binding="{Binding Name}"
+                                        IsReadOnly="True"
+                                        Width="180"/>
+                    <DataGridTextColumn Header="Значение"
+                                        Binding="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                                        Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="1" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom">
+                <Button Content="Сохранить" 
+                        Width="200" 
+                        Style="{StaticResource ButtonStyle}"
+                        Command="{Binding CommitCommand}"
+                        Margin="0,0,8,0"/>
+                <Button Content="Отмена" 
+                        Width="180" 
+                        Style="{StaticResource ButtonStyle}"
+                        Command="{Binding CancelCommand}"/>
+            </StackPanel>
+        </Grid>      
+
     </Grid>
 </Window>

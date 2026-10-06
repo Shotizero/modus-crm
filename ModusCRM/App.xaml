@@ -8,8 +8,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/AppResources/Styles/ButtonStyle.xaml"/>
                 <ResourceDictionary Source="/AppResources/Styles/ComboBoxStyle.xaml"/>
-                <ResourceDictionary Source="/AppResources/Styles/DataGridStyle.xaml"/>                
-                <ResourceDictionary Source="/AppResources/Styles/LabelStyle.xaml"/>                
+                <ResourceDictionary Source="/AppResources/Styles/DataGridStyle.xaml"/>
+                <ResourceDictionary Source="/AppResources/Styles/LabelStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
